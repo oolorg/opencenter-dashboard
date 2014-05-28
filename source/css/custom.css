@@ -162,16 +162,18 @@ Header
   text-shadow: none;
 }
 .brand span{
-  background: transparent url('../img/logo-privatecloud.png') no-repeat;
+/*  background: transparent url('../img/logo-privatecloud.png') no-repeat;*/
+  background: transparent url('../img/logo-ool.png') no-repeat; 
   background-position: center center;
   width: 220px;
-  height: 48px;
+  height: 77px;
   display: block;
   overflow: hidden;
   text-indent: 200%;
   white-space: nowrap;
   padding: 0px;
-  margin: 15px 0px 0px 0px;
+/*  margin: 15px 0px 0px 0px;*/
+  margin: 0px 0px 0px 0px;
 }
 .brand::before {
   content: '';
@@ -251,7 +253,8 @@ Login Form
   padding: 0px;
 }
 #rackspace-logo-container {
-  background: transparent url('../img/logo-privatecloud-large.png') no-repeat;
+/*  background: transparent url('../img/logo-privatecloud-large.png') no-repeat;*/
+  background: transparent url('../img/logo-ool.png') no-repeat;
   background-position: center center;
   width: 192px;
   height: 57px;
@@ -329,6 +332,13 @@ Input Form
   line-height: 1;
 }
 
+/* for neutron */
+#indexInputModal .modal-body {
+  overflow-y: auto;
+  max-height: 500px;
+}
+/* for neutron */
+
 /****************
 Content
 ****************/
@@ -362,6 +372,9 @@ Content
 #root > .well > .container-body {
   max-height: none !important;
   overflow-y: scroll;
+}
+.sort-target .container-name {
+  cursor: pointer;
 }
 
 /* Re-space wells */
@@ -555,7 +568,7 @@ ul.backend-list li {
   background-color: #c40022 !important;
 }
 .disabled_state, .pending_state {
-  background-color: #999 !important;
+  background-color: #ccc !important;
   color: #666 !important;
 }
 .processing_state {

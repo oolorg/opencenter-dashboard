@@ -52,7 +52,7 @@ block templates
                     a.external(href="#")= "OpenCenter Agent."
 
     script(type='text/html', id='indexItemTemplate')
-      .well.well-small.pull-left.opencenter-container
+      .well.well-small.pull-left.opencenter-container(data-bind='attr: {"data-id": id}')
         header.container-header
           .pull-left.btn-group
             .dropdown
@@ -65,11 +65,19 @@ block templates
                 li: span#placeHolder
                 // /ko
                 // ko foreach: dash.actions
-                li: a(tabindex='-1', href='#', data-bind='click: $root.doAction.bind($data, $parent), text: name + "..."')
+                //li: a(tabindex='-1', href='#', data-bind='click: $root.doAction.bind($data, $parent), text: name + "..."')
+                // ko if: name.search("Set Logical Topology") !== -1
+                li
+                  a(tabindex='-1', href='#', onclick="dashboard.set_logical_topology(this)") Set Logical Topology
                 // /ko
-          .pull-left.container-name: span(data-bind='text: name')
+                // ko if: name.search("Set Logical Topology") == -1
+                li
+                  a(tabindex='-1', href='#', data-bind='click: $root.doAction.bind($data, $parent), text: name + "..."')
+                // /ko
+                // /ko
+          .pull-left.container-name(ondblclick='dashboard.toggle(this)'): span(data-bind='text: name')
 
-        .container-body
+        .container-body(data-bind='containerToggle: dash.containers')
           .drop-target(data-bind='sortable: dash.agents, attr: {"data-id": id}, dropper: dash.locked')
             .node
               .statusDescription(disabled='disabled', data-bind='css: dash.statusClass')
@@ -86,7 +94,8 @@ block templates
                   li: a(tabindex='-1', href='#', data-bind='click: $root.doAction.bind($data, $parent), text: name + "..."')
                   // /ko
               .draggable.node-name(data-bind='text: name, popper: $data, css: {dragDisable: dash.locked}, attr: {"data-id": id}')
-          div(data-bind='template: {name: "indexItemTemplate", foreach: dash.containers}')
+          div.sort-target(data-bind='template: {name: "indexItemTemplate", foreach: dash.containers}')
+        span.container-footer(data-bind='containerSortable: dash.containers')
 
     #indexTaskLogPane(data-bind='showPane: dashboard.displayTaskLogPane')
       #taskPane
@@ -122,10 +131,88 @@ block templates
               .item(data-bind='css: {active: !$index()%2}')
                 fieldset
                   // ko foreach: args
+                  // ko if: value.friendly.search("neutron") == -1
+                  // ko if: value.friendly.search("Restor") == -1
+                  // ko if: value.friendly.search("tenant name") == -1
+                  // ko if: value.friendly.search("auth") == -1
                   .control-group
                     label.control-label(data-bind='text: value.friendly, attr: {for: key}')
                     .controls
                       input(data-bind='tipper: value, attr: {id: key, name: key, placeholder: value.placeholder, value: value.default, type: dashboard.convertValueType(value.type)}, css: {required: value.required, cidrType: value.type === "cidr"}')
+                  // /ko
+                  // /ko
+                  // /ko
+                  // /ko
+
+                  // ko if: value.friendly.search("Restor") !== -1
+                  // ko if: value.restore_list.length != 0
+                  .control-group
+                    label.control-label(data-bind='text: value.friendly, attr: {for: key}')
+                    .controls
+                      select(data-bind='tipper: value, attr: {id: key, name: key, placeholder: value.placeholder, value: value.default, type: dashboard.convertValueType(value.type)}')
+                        // ko foreach: value.restore_list
+                        option(data-bind='value:$data.value , text: $data.key')
+                        // /ko
+                  // /ko
+                  // ko if: value.restore_list.length == 0
+                  label.control-label(data-bind=' attr: {for: key}') Restore data is none
+                  // /ko
+                  // /ko
+                  // /ko
+
+                  // ko foreach: args
+                  // ko if: value.friendly.search("neutron") !== -1
+                  // ko if: key == "network_provider"
+                  .control-group
+                    label.control-label(data-bind='text: value.friendly, attr: {for: key}')
+                    .controls
+                      select(data-bind='tipper: value, attr: {id: key, name: key, placeholder: value.placeholder, value: value.default, type: dashboard.convertValueType(value.type)}')
+                        option(value="quantum")="Neutron"
+                        option(value="nova")="Nova-Netowork"
+                  // /ko
+                  // ko if: key == "neutron_plugin"
+                  .control-group
+                    label.control-label(data-bind='text: value.friendly, attr: {for: key}')
+                    .controls
+                      select(data-bind='tipper: value, attr: {id: key, name: key, placeholder: value.placeholder, value: value.default, type: dashboard.convertValueType(value.type)}')
+                        option(value="ovs")="Open vSwitch"
+                        option(value="nec")="NEC OpenFlow(trema)"
+                        option(value="ryu")="ryu"
+                  // /ko
+                  // ko if: key == "neutron_ovs_network_type"
+                  .control-group
+                    label.control-label(data-bind='text: value.friendly, attr: {for: key}')
+                    .controls
+                      select(data-bind='tipper: value, attr: {id: key, name: key, placeholder: value.placeholder, value: value.default, type: dashboard.convertValueType(value.type)}')
+                        option(value="gre")="gre"
+                        option(value="vlan")="vlan"
+                  // /ko
+                  // ko if: key == "neutron_lbaas_enabled"
+                  .control-group
+                    label.control-label(data-bind='text: value.friendly, attr: {for: key}')
+                    .controls
+                      select(data-bind='tipper: value, attr: {id: key, name: key, placeholder: value.placeholder, value: value.default, type: dashboard.convertValueType(value.type)}')
+                        option(value="True")="True"
+                        option(value="False")="False"
+                  // /ko
+                  // ko if: key == "neutron_of_if"
+                  .control-group
+                    label.control-label(data-bind='text: value.friendly, attr: {for: key}')
+                    .controls
+                      select(data-bind='tipper: value, attr: {id: key, name: key, placeholder: value.placeholder, value: value.default, type: dashboard.convertValueType(value.type)}')
+                        option(value="none")="None"
+                        option(value="eth0")="eth0"
+                        option(value="eth1")="eth1"
+                        option(value="eth2")="eth2"
+                        option(value="eth3")="eth3"
+                  // /ko
+                  // ko if: key == "neutron_ofc_host"
+                  .control-group
+                    label.control-label(data-bind='text: value.friendly, attr: {for: key}')
+                    .controls
+                      input(data-bind='tipper: value, attr: {id: key, name: key, placeholder: value.placeholder, value: value.default, type: dashboard.convertValueType(value.type)}, css: {required: value.required, cidrType: value.type === "cidr"}')
+                  // /ko
+                  // /ko
                   // /ko
               // /ko
         .modal-footer

@@ -63,6 +63,7 @@ devpub: | clean_pub
 	-cp -f ${PWD}/components/jquery/jquery.min.js public/js
 	-cp -f ${PWD}/components/jquery-ui/ui/minified/jquery-ui.custom.min.js public/js/jquery-ui.min.js
 	-cp -f ${PWD}/components/jquery.validation/jquery-validate.min.js public/js
+	-cp -f ${PWD}/components/jquery/jquery.cookie.js public/js
 	@echo ${HR}
 	@echo "Publishing Dashboard components"
 	@echo ${HR}

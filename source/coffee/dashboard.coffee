@@ -28,6 +28,10 @@ unless Array::filter
 # Create and store namespace
 dashboard = exports?.dashboard ? @dashboard = {}
 
+# OF-Patch Cooperation
+ofp_url = "http://ofpatch-gui.testbed.ool.org:58080/ofpgui/topology_manager.jsp"
+# OF-Patch Cooperation
+
 dashboard.selector = (cb, def) ->
   selected = ko.observable def ? {} unless selected?
   cb def if cb? and def?
@@ -103,6 +107,9 @@ dashboard.authHeader = {}
 dashboard.authUser = ko.observable ""
 dashboard.authCheck = ko.computed ->
   if dashboard.authUser() isnt "" then true else false
+
+dashboard.makeBasicAuth " ", ""
+
 dashboard.authLogout = ->
   # Clear out all the things
   model = dashboard.indexModel
@@ -111,10 +118,36 @@ dashboard.authLogout = ->
   model.keyItems = {}
   model.tmpItems []
   # Try grabbing new nodes; will trigger login form if needed
-  dashboard.getNodes "/octr/nodes/", model.tmpItems, model.keyItems
+  #dashboard.getNodes "/octr/nodes/", model.tmpItems, model.keyItems
+  window.location.href = "http://openam.testbed.ool.org:8080/openam/UI/Logout";
 
 # Guard to spin requests while logging in
 dashboard.loggingIn = false
+
+$.cookie.json = true
+dashboard.toggleStateArray = {}
+tmpStateArray = $.cookie('toggleStateArray')
+if tmpStateArray
+  dashboard.toggleStateArray = tmpStateArray
+
+dashboard.sortStateArray = []
+tmpStateArray = $.cookie('sortStateArray')
+if tmpStateArray
+  dashboard.sortStateArray = tmpStateArray.split(",")
+
+dashboard.toggle = (obj) ->
+  $parent = $(obj).closest(".opencenter-container")
+  data_id = $parent.attr("data-id")
+  if data_id != "1"
+    $target = $parent.find(".container-body:first")
+    display = $target.css("display")
+    $target.slideToggle();
+    if data_id of dashboard.toggleStateArray
+      if display == "block"
+        dashboard.toggleStateArray[data_id].display = "none"
+      else
+        dashboard.toggleStateArray[data_id].display = "block"
+    $.cookie('toggleStateArray', dashboard.toggleStateArray, {expires: 7})
 
 dashboard.drawStepProgress = ->
   $form = $("form#inputForm")
@@ -315,6 +348,10 @@ dashboard.parseNodes = (data, keyed={}) ->
     if node?.attrs?.locked # Node is locked
       node.dash.locked true
 
+  for id of keyed
+    if !(id of dashboard.toggleStateArray)
+      dashboard.toggleStateArray[id] = {"display":"block"}
+
   root # Return root for mapping
 
 dashboard.setError = (node) ->
@@ -503,3 +540,36 @@ dashboard.convertValueType = (type) ->
   switch type
     when "password" then "password"
     else "text"
+
+# OF-Patch Cooperation Add
+
+dashboard.set_logical_topology = (obj) ->
+  url = ofp_url
+  deviceNames = ""
+  
+  # form make
+  form = document.createElement("form")
+  form.setAttribute "method", "post"
+  form.setAttribute "action", url
+  document.body.appendChild form
+  $container = $(obj).closest(".opencenter-container")
+  $node_names = $container.find(".node-name")
+  
+  # node name make
+  node_name_id = 0
+
+  while node_name_id < $node_names.length
+    deviceNames += $node_names[node_name_id].textContent
+    deviceNames += ","  if node_name_id < $node_names.length - 1
+    node_name_id++
+  
+  # input val make
+  input = document.createElement("input")
+  input.setAttribute "type", "hidden"
+  input.setAttribute "name", "deviceNames"
+  input.setAttribute "value", deviceNames
+  form.appendChild input
+  form.submit()
+  return
+
+# OF-Patch Cooperation

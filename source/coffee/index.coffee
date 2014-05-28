@@ -194,6 +194,16 @@ $ ->
         step.name = '' #TODO: Possibly create a name for each step.
         step.args = dashboard.toArray plan?.args
         # Fixup missing/empty friendly names
+
+#add_backup
+        if "args" of plan
+          if "restore_name" is step.args[_i].key
+            if plan.args.restore_name.list?
+              tmp_obj = step.args[_i].value
+              tmp_obj.restore_list = dashboard.toArray(plan.args.restore_name.list)
+#add_backup
+
+
         for arg,index in step.args
           unless arg.value?.friendly? and !!arg.value.friendly
             step.args[index].value.friendly = step.args[index].key
@@ -250,7 +260,10 @@ $ ->
       submitHandler: (form) =>
         $(form).find('.control-group').each (index, element) =>
           key = $(element).find('label').first().attr('for')
-          val = $(element).find('input').val()
+#for_neutron
+#          val = $(element).find('input').val()
+          val = $(element).find('input, select').val()
+#for_neutron
           for plan in @wsPlans().plan
             if plan?.args?[key]?
               plan.args[key].value = val
@@ -393,7 +406,10 @@ $ ->
     init: (el, data) ->
       opts =
         title: data().description
-        trigger: "hover"
+        #for neutron
+        #trigger: "hover"
+        trigger: "manual"
+        #for neutron
         container: "#indexInputModal"
         animation: false
       $(el).tooltip opts
@@ -404,6 +420,45 @@ $ ->
         $(el).removeClass("ko_container").removeClass("ui-sortable")
       else
         $(el).addClass("ko_container").addClass("ui-sortable")
+
+  ko.bindingHandlers.containerToggle =
+    update: (el, data) ->
+      $parent = $(el).closest(".opencenter-container")
+      data_id = $parent.attr("data-id");
+      if data_id of dashboard.toggleStateArray
+        if dashboard.toggleStateArray[data_id].display == "none"
+          $(el).css("display", "none");
+
+  ko.bindingHandlers.containerSortable =
+    init: (el, data) ->
+      $parent = $(el).closest(".opencenter-container")
+      data_id = $parent.attr("data-id");
+      if data_id == "1"
+        $sort_root = $parent.find(".sort-target:first")
+        $sort_root.addClass('sort-root')
+        $handle = $sort_root.find("> .opencenter-container > .container-header")
+        $handle.addClass('sort-handle')
+        $sort_root.sortable
+          handle: ".sort-handle"
+          cursor: "move"
+          opacity: "0.8"
+          revert: "true"
+          tolerance: "pointer"
+          items: "> .opencenter-container"
+          distance: "30"
+          start: (ev, ui) ->
+            dashboard.indexModel.siteLocked(true)
+          update: (ev, ui) ->
+            dashboard.sortStateArray = $sort_root.sortable("toArray", {attribute: 'data-id'})
+            $.cookie("sortStateArray", dashboard.sortStateArray.join(","), {expires: 7})
+            dashboard.indexModel.siteLocked(false)
+        if dashboard.sortStateArray.length > 0
+          $.each(
+            dashboard.sortStateArray
+            (index, value) ->
+              $tmp_obj = $('.opencenter-container[data-id='+value+']')
+              $tmp_obj.appendTo($sort_root.get(0))
+          )
 
   # Custom binding provider with error handling
   ErrorHandlingBindingProvider = ->
