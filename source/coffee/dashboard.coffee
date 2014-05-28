@@ -573,3 +573,16 @@ dashboard.set_logical_topology = (obj) ->
   return
 
 # OF-Patch Cooperation
+
+# Test Application Cooperation
+
+dashboard.test_application = (obj) ->
+  $container = $(obj).closest(".opencenter-container")
+  $node_names = $container.find(".node-name")
+  dashboard.get("/octr/nodes/ipaddress/" + $node_names[0].firstChild.nodeValue , (data) ->
+    w.location.href = "http://" + data.ip_address + ":18080/"
+  , null)
+  w = window.open('', 'test_application')
+  return
+
+# Test Application Cooperation

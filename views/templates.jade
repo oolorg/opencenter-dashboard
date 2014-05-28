@@ -91,7 +91,14 @@ block templates
                   li: span#placeHolder
                   // /ko
                   // ko foreach: dash.actions
-                  li: a(tabindex='-1', href='#', data-bind='click: $root.doAction.bind($data, $parent), text: name + "..."')
+                  // ko if: name.search("Test Application") !== -1
+                  li
+                    a(tabindex='-1', href='#', onclick="dashboard.test_application(this)") Test Application
+                  // /ko
+                  // ko if: name.search("Test Application") == -1
+                  li 
+                    a(tabindex='-1', href='#', data-bind='click: $root.doAction.bind($data, $parent), text: name + "..."')
+                  // /ko
                   // /ko
               .draggable.node-name(data-bind='text: name, popper: $data, css: {dragDisable: dash.locked}, attr: {"data-id": id}')
           div.sort-target(data-bind='template: {name: "indexItemTemplate", foreach: dash.containers}')
