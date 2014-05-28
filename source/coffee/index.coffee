@@ -27,7 +27,7 @@ $ ->
   IndexModel = ->
     # TODO: Map from data source
     @siteNav = ko.observableArray [
-      name: "OpenCenter"
+      name: "OpenOrion"
       template: "indexTemplate"
     ]
 
